@@ -1,0 +1,14 @@
+.box {
+    margin-bottom: 10px;
+}
+.box-header {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.box-body {
+    padding: 1px;
+}
+
+.sidebar-menu>li>a>.fab, span>.fa {
+    width:20px
+}
