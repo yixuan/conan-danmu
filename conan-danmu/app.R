@@ -52,7 +52,7 @@ ui = dashboardPage(
                     ),
                     column(width = 2,
                            selectInput(
-                               "sort", label = span(icon("sort-amount-down"), strong("排序")), 
+                               "sort", label = span(icon("sort-amount-down"), strong("排序")),
                                choices = c("按热度排序", "按集数排序"), width = "100%"
                            )
                     )
@@ -120,9 +120,29 @@ render_box = function(plotbox, info, entry)
     )
 }
 # Merge multiple danmu
-merge_danmu = function(danmu, max_danmu = 30)
+merge_danmu = function(danmu, max_danmu = 100)
 {
-    paste(head(danmu, max_danmu), collapse = "<br/>")
+    # line_width = 50
+    # danmu = head(danmu, max_danmu)
+    # len = nchar(danmu)
+    # cumlen = cumsum(len)
+    # breaks = seq(0, max(cumlen) + line_width, by = line_width)
+    # lino = cut(cumlen, breaks)
+    # lines = tapply(danmu, lino, function(x) paste(x, collapse = "&emsp;&emsp;&emsp;&emsp;"))
+    # paste(lines, collapse = "<br/>")
+
+    danmu = head(danmu, max_danmu)
+    maxlen = 15
+    overlong = nchar(danmu) > maxlen
+    danmu = paste(substr(danmu, 1, maxlen), ifelse(overlong, "(...)", ""), sep = "")
+    n = length(danmu)
+    cols = 5
+    rows = ceiling(n / cols)
+    lino = rep(1:rows, each = cols)[1:n]
+    lines = tapply(danmu, lino, function(x)
+        paste("<td>", x, "&emsp;&emsp;</td>", sep = "", collapse = "\n"))
+    tab = paste("<tr>", lines, "</tr>", sep = "", collapse = "\n")
+    paste("<table>", tab, "</table>", sep = "")
 }
 # Render the plots
 render_plot = function(info, entry)
@@ -144,7 +164,7 @@ render_plot = function(info, entry)
     # Divide video time into bins
     dat = dat %>% mutate(bin = cut(dat$video_time, c(x1, Inf), include.lowest = TRUE))
     # Aggregate danmu within each bin
-    max_danmu = 30
+    max_danmu = 100
     gdat = dat %>% group_by(bin) %>% arrange(video_time) %>%
         summarize(danmus = merge_danmu(danmu, max_danmu))
     # Some bins may not contain data
